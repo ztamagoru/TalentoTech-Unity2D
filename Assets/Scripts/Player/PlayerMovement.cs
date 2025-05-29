@@ -13,12 +13,34 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody2D rb;
 
+    private bool timerOn = false;
+    private float timeLeft = 0;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
+    {
+        if (timerOn)
+        {
+            TimerUpdate();
+        }
+
+        MovementInput();      
+    }
+
+    private void FixedUpdate()
+    {
+        mov = new Vector2(horizontalMovement, verticalMovement);
+
+        mov = mov.normalized;
+
+        rb.AddForce(mov * speed * Time.fixedDeltaTime);
+    }
+
+    private void MovementInput()
     {
         if (Input.GetKey(KeyCode.A))
         {
@@ -45,13 +67,26 @@ public class PlayerMovement : MonoBehaviour
         {
             verticalMovement = 0;
         }
+    }
 
-        //mov = new Vector2(horizontalMovement, 0);
+    private void StartTimer(float duration)
+    {
+        timeLeft = duration;
+        timerOn = true;
+    }
 
-        mov = new Vector2(horizontalMovement, verticalMovement);
+    private void TimerUpdate()
+    {
+        if (timeLeft > 0)
+        {
+            timeLeft -= Time.deltaTime;
+        }
+        else
+        {
+            timerOn = false;
+            timeLeft = 0;
 
-        mov = mov.normalized;
-
-        rb.AddForce(mov * speed * Time.fixedDeltaTime);
+            Debug.Log("Timer ended");
+        }
     }
 }
