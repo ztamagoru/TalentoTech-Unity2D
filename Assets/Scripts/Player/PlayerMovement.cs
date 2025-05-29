@@ -1,15 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public enum PlayerState
+    {
+        Idle,
+        Walking,
+        Running,
+        Jumping,
+        Falling
+    }
+
+    private PlayerState currentState = PlayerState.Idle;
+
     private int horizontalMovement = 0;
     private int verticalMovement = 0;
 
     private Vector2 mov = new Vector2(0, 0);
 
     [SerializeField] private float speed;
+    [SerializeField] private float speedMultiplier = 2.5f;
 
     private Rigidbody2D rb;
 
@@ -42,30 +56,34 @@ public class PlayerMovement : MonoBehaviour
 
     private void MovementInput()
     {
-        if (Input.GetKey(KeyCode.A))
+        horizontalMovement = 
+            Input.GetKey(KeyCode.A) ? -1 : 
+            Input.GetKey(KeyCode.D) ? 1 : 0;
+
+        verticalMovement = 
+            Input.GetKey(KeyCode.W) ? 1 : 
+            rb.velocity.y <= -0.1f ? -1 : 0;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            horizontalMovement = -1;
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            horizontalMovement = 1;
-        }
-        else
-        {
-            horizontalMovement = 0;
+            speed *= speedMultiplier;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            verticalMovement = 1;
+            speed /= speedMultiplier;
         }
-        else if (Input.GetKeyDown(KeyCode.LeftControl))
+
+        PlayerState previousState = currentState;
+
+        currentState = verticalMovement > 0 ? PlayerState.Jumping :
+            verticalMovement < 0 ? PlayerState.Falling :
+            horizontalMovement != 0 ? (Input.GetKey(KeyCode.LeftShift) ? PlayerState.Running : PlayerState.Walking) :
+            PlayerState.Idle;
+
+        if (currentState != previousState)
         {
-            verticalMovement = -1;
-        }
-        else
-        {
-            verticalMovement = 0;
+            Debug.Log($"{currentState}");
         }
     }
 
