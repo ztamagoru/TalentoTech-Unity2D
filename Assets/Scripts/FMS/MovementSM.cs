@@ -10,16 +10,21 @@ public class MovementSM : StateMachine
     public Idle idleState;
     [HideInInspector]
     public Walking walkingState;
+    [HideInInspector]
+    public State runningState;
 
-    public Rigidbody2D rigidbody;
-    public Animation animation;
+    public Rigidbody2D rb;
+    public Animator animator;
+    public SpriteRenderer spriteRenderer;
 
-    public float speed = 5f;
+    public float speed;
+    public int sprintMultiplier;
 
     private void Awake()
     {
         idleState = new Idle(this);
         walkingState = new Walking(this);
+        runningState = new Running(this);
     }
 
     protected override State GetInitialState()

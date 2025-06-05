@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
 public class Idle : State
 {
@@ -17,6 +16,7 @@ public class Idle : State
     {
         base.Enter();
         _horizontalInput = 0f;
+        _sm.animator.SetFloat("moving", 0f);
     }
 
     public override void UpdateLogic()
@@ -24,8 +24,17 @@ public class Idle : State
         base.UpdateLogic();
         
         _horizontalInput = Input.GetAxis("Horizontal");
-        
-        if(Mathf.Abs(_horizontalInput) > Mathf.Epsilon)
-            stateMachine.ChangeState(_sm.walkingState);
+
+        if (Mathf.Abs(_horizontalInput) > Mathf.Epsilon && Input.GetKey(KeyCode.LeftShift))
+                stateMachine.ChangeState(_sm.runningState);
+        else if (Mathf.Abs(_horizontalInput) > Mathf.Epsilon)
+                stateMachine.ChangeState(_sm.walkingState);
+    }
+
+    public override void UpdatePhysics()
+    {
+        base.UpdatePhysics();
+
+        _sm.rb.velocity = new Vector2(0, 0);
     }
 }

@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class Walking : State
+public class Running : State
 {
     private MovementSM _sm;
     private float _horizontalInput;
 
-    public Walking(MovementSM stateMachine) : base("Walking", stateMachine)
+    public Running(MovementSM stateMachine) : base("Running", stateMachine)
     {
         _sm = (MovementSM)stateMachine;
     }
@@ -16,7 +17,7 @@ public class Walking : State
     {
         base.Enter();
         _horizontalInput = 0f;
-        _sm.animator.SetFloat("moving", 0.5f);
+        _sm.animator.SetFloat("moving", 1f);
     }
 
     public override void UpdateLogic()
@@ -27,16 +28,16 @@ public class Walking : State
 
         if (Mathf.Abs(_horizontalInput) < Mathf.Epsilon)
             stateMachine.ChangeState(_sm.idleState);
-        else if (Input.GetKeyDown(KeyCode.LeftShift))
-            stateMachine.ChangeState(_sm.runningState);
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+            stateMachine.ChangeState(_sm.walkingState);
     }
 
     public override void UpdatePhysics()
     {
         base.UpdatePhysics();
         Vector2 vel = _sm.rb.velocity;
-
-        vel.x = Input.GetAxis("Horizontal") == 0f ? 0f : _horizontalInput * _sm.speed;
+        
+        vel.x = Input.GetAxis("Horizontal") == 0f ? 0f : _horizontalInput * _sm.speed * _sm.sprintMultiplier;
 
         _sm.rb.velocity = vel;
         _sm.spriteRenderer.flipX = vel.x < 0f;
