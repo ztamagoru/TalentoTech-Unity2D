@@ -4,35 +4,28 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class Player : MonoBehaviour
 {
-    public enum PlayerState
-    {
-        Idle,
-        Walking,
-        Running,
-        Jumping,
-        Falling
-    }
 
-    private PlayerState currentState = PlayerState.Idle;
 
-    private int horizontalMovement = 0;
-    private int verticalMovement = 0;
+    public int horizontalMovement = 0;
+    public int verticalMovement = 0;
 
     private Vector2 mov = new Vector2(0, 0);
 
-    [SerializeField] private float speed;
-    [SerializeField] private float speedMultiplier = 2.5f;
+    public float speed;
+    public float speedMultiplier = 2.5f;
 
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
+    private Collider2D playerCollider;
 
     private bool timerOn = false;
     private float timeLeft = 0;
 
-    private void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<Collider2D>();
     }
 
     void Update()
@@ -73,19 +66,16 @@ public class PlayerMovement : MonoBehaviour
         {
             speed /= speedMultiplier;
         }
-
-        PlayerState previousState = currentState;
-
-        currentState = verticalMovement > 0 ? PlayerState.Jumping :
-            verticalMovement < 0 ? PlayerState.Falling :
-            horizontalMovement != 0 ? (Input.GetKey(KeyCode.LeftShift) ? PlayerState.Running : PlayerState.Walking) :
-            PlayerState.Idle;
-
-        if (currentState != previousState)
-        {
-            Debug.Log($"{currentState}");
-        }
     }
+
+    [SerializeField] private LayerMask groundLayer;
+
+    public bool IsOnGround()
+    {
+        return playerCollider.IsTouchingLayers(LayerMask.GetMask("Ground"));
+    }
+
+    #region timer
 
     private void StartTimer(float duration)
     {
@@ -107,4 +97,5 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Timer ended");
         }
     }
+    #endregion
 }
